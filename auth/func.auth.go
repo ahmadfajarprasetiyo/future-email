@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"../global"
+	"../utils"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -26,26 +27,51 @@ var generatePasswordHash = func(password string) (string, error) {
 	return string(passwordHash), err
 }
 
+var generateToken = func(userID int) (string, error) {
+	randomString := utils.RandStringBytes(LengthToken)
+
+	return randomString, nil
+}
+
 var Login = func(c *gin.Context) {
 
 	username := c.PostForm("username")
-	// password := c.PostForm("password")
+	password := c.PostForm("password")
 
 	account, err := getAccountByUsername(username)
-
-	if err == nil {
-		c.JSON(200, gin.H{
-			"status":   "success",
-			"password": account.Password,
-		})
-	} else {
+	if err != nil {
 		fmt.Println(err)
 		c.JSON(400, gin.H{
-			"status":   "failed",
-			"password": "-",
+			"status": "failed",
+			"token":  "-",
 		})
+		return
 	}
 
+	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(password))
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(400, gin.H{
+			"status": "failed",
+			"token":  "-",
+		})
+		return
+	}
+
+	token, err := generateToken(account.UserID)
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(400, gin.H{
+			"status": "failed",
+			"token":  "-",
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"status": "success",
+		"token":  token,
+	})
 	return
 }
 
