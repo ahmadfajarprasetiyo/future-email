@@ -7,3 +7,10 @@ const (
 	passwordPSQL = "fajar"
 	dbnamePSQL   = "future_email"
 )
+
+const (
+	redisConnectionType = "tcp"
+	redisURL            = "localhost:6379"
+)
+
+const ExpiredTimeToken = 3600

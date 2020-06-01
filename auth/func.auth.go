@@ -30,6 +30,15 @@ var generatePasswordHash = func(password string) (string, error) {
 var generateToken = func(userID int) (string, error) {
 	randomString := utils.RandStringBytes(LengthToken)
 
+	redisConn := global.GetRedisConn()
+	keyRedis := fmt.Sprintf(KeyRedisToken, userID)
+
+	_, err := redisConn.Do("SETEX", keyRedis, global.ExpiredTimeToken, randomString)
+	if err != nil {
+		fmt.Println(err)
+		return "-", err
+	}
+
 	return randomString, nil
 }
 
