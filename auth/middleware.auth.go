@@ -16,6 +16,7 @@ func CheckToken() gin.HandlerFunc {
 		if err != nil {
 			fmt.Println(err)
 			utils.ErrorResponse(c)
+			c.Abort()
 			return
 		}
 
@@ -24,6 +25,7 @@ func CheckToken() gin.HandlerFunc {
 		valid := checkIsValidToken(userID, token)
 		if !valid {
 			utils.ErrorResponse(c)
+			c.Abort()
 			return
 		}
 
