@@ -1,7 +1,21 @@
 package main
 
-import "fmt"
+import (
+	"os"
+
+	"./auth"
+	"./global"
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
-	fmt.Println("ini coba project")
+	r := gin.Default()
+	err := global.InitDatabase()
+	if err != nil {
+		os.Exit(1)
+	}
+
+	r.POST("/login", auth.Login)
+
+	r.Run()
 }
