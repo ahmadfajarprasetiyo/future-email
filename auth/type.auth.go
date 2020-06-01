@@ -7,3 +7,4 @@ type Account struct {
 }
 
 const QueryGetAccountByUsername = "SELECT * FROM account WHERE username='%s'"
+const QueryInsertAccount = "INSERT INTO account (username, password) VALUES ($1, $2)"

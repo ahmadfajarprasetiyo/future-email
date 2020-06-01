@@ -16,6 +16,7 @@ func main() {
 	}
 
 	r.POST("/login", auth.Login)
+	r.POST("/register", auth.Register)
 
 	r.Run()
 }
