@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/gomodule/redigo/redis"
+
 	"../global"
 	"../utils"
 	"github.com/gin-gonic/gin"
@@ -42,6 +44,20 @@ var generateToken = func(userID int) (string, error) {
 	return randomString, nil
 }
 
+var checkIsValidToken = func(userID int, token string) bool {
+	redisConn := global.GetRedisConn()
+	keyRedis := fmt.Sprintf(KeyRedisToken, userID)
+
+	tokenFromRedis, err := redis.String(redisConn.Do("GET", keyRedis))
+
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	return token == tokenFromRedis
+}
+
 var Login = func(c *gin.Context) {
 
 	username := c.PostForm("username")
@@ -50,30 +66,21 @@ var Login = func(c *gin.Context) {
 	account, err := getAccountByUsername(username)
 	if err != nil {
 		fmt.Println(err)
-		c.JSON(400, gin.H{
-			"status": "failed",
-			"token":  "-",
-		})
+		utils.ErrorResponse(c)
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(password))
 	if err != nil {
 		fmt.Println(err)
-		c.JSON(400, gin.H{
-			"status": "failed",
-			"token":  "-",
-		})
+		utils.ErrorResponse(c)
 		return
 	}
 
 	token, err := generateToken(account.UserID)
 	if err != nil {
 		fmt.Println(err)
-		c.JSON(400, gin.H{
-			"status": "failed",
-			"token":  "-",
-		})
+		utils.ErrorResponse(c)
 		return
 	}
 
@@ -92,18 +99,14 @@ var Register = func(c *gin.Context) {
 
 	if err != sql.ErrNoRows {
 		fmt.Println(err)
-		c.JSON(400, gin.H{
-			"status": "failed",
-		})
+		utils.ErrorResponse(c)
 		return
 	}
 
 	password, err = generatePasswordHash(password)
 	if err != nil {
 		fmt.Println(err)
-		c.JSON(400, gin.H{
-			"status": "failed",
-		})
+		utils.ErrorResponse(c)
 		return
 	}
 
@@ -112,9 +115,7 @@ var Register = func(c *gin.Context) {
 
 	if err != nil {
 		fmt.Println(err)
-		c.JSON(400, gin.H{
-			"status": "failed",
-		})
+		utils.ErrorResponse(c)
 		return
 	}
 
