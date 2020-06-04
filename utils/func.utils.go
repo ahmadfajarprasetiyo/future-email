@@ -20,7 +20,7 @@ func IsValidTime(timeSend int64) bool {
 	now := time.Now()
 	secs := now.Unix()
 
-	return (timeSend - secs) > 60
+	return (timeSend - secs) > 20
 }
 
 func ErrorResponse(c *gin.Context) {
